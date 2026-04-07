@@ -9,4 +9,4 @@ from openupgradelib import openupgrade
 @openupgrade.migrate()
 def migrate(env, version):
     for item in env["document.page"].search([("content", "ilike", "${")]):
-        item.content = re.sub(r"\${(.+)}", r"{{\1}}", item.content)
+        item.content = re.sub(r"\${([^}]+)}", r"{{\1}}", item.content)
