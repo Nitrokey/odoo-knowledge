@@ -21,7 +21,7 @@
             <field name="content" position="before">
                 <field
                     name="content_parsed"
-                    class="oe_read_only"
+                    readonly="1"
                     widget="document_page_reference"
                 />
             </field>
@@ -39,7 +39,7 @@
             <field name="content" position="before">
                 <field
                     name="content_parsed"
-                    class="oe_read_only"
+                    readonly="1"
                     widget="document_page_reference"
                 />
             </field>
