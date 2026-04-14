@@ -1,0 +1,29 @@
+/* document_page_reference: "click to edit" toggle behaviour
+ *
+ * When the form is in "view" state (dpref_show_editor absent):
+ *   - content_parsed widget (o_field_document_page_reference) is visible
+ *   - content editor (.dpref-content-editor) is hidden
+ *
+ * When the user clicks the rendered area or starts editing (dpref_show_editor present):
+ *   - content_parsed widget is hidden
+ *   - content editor is visible
+ *
+ * The dpref_show_editor class is managed by editor.esm.js based on record.isDirty
+ * and explicit clicks on the rendered content area.
+ */
+
+/* View state: hide the raw content editor */
+.o_form_view:not(.dpref_show_editor) .dpref-content-editor {
+    display: none !important;
+}
+
+/* Edit state: hide the rendered content widget */
+.o_form_view.dpref_show_editor .o_field_document_page_reference {
+    display: none !important;
+}
+
+/* Cursor hint: rendered content is clickable to enter edit mode */
+.o_form_view:not(.dpref_show_editor) .o_field_document_page_reference {
+    cursor: text;
+    min-height: 2em;
+}

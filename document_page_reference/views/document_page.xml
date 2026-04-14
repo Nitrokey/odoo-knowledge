@@ -16,7 +16,7 @@
                 </h2>
             </xpath>
             <field name="content" position="attributes">
-                <attribute name="class">oe_edit_only</attribute>
+                <attribute name="class">dpref-content-editor</attribute>
             </field>
             <field name="content" position="before">
                 <field
@@ -33,7 +33,7 @@
         <field name="inherit_id" ref="document_page.view_wiki_menu_form" />
         <field name="arch" type="xml">
             <field name="content" position="attributes">
-                <attribute name="class">oe_edit_only</attribute>
+                <attribute name="class">dpref-content-editor</attribute>
             </field>
             <field name="content" position="before">
                 <field

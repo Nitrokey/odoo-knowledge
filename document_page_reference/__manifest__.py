@@ -17,6 +17,7 @@
     "assets": {
         "web.assets_backend": [
             "document_page_reference/static/src/js/editor.esm.js",
+            "document_page_reference/static/src/css/document_page_reference.css",
         ],
     },
     "maintainers": ["etobella"],
