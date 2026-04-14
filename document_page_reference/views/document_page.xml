@@ -21,7 +21,6 @@
             <field name="content" position="before">
                 <field
                     name="content_parsed"
-                    readonly="1"
                     widget="document_page_reference"
                 />
             </field>
@@ -39,7 +38,6 @@
             <field name="content" position="before">
                 <field
                     name="content_parsed"
-                    readonly="1"
                     widget="document_page_reference"
                 />
             </field>
