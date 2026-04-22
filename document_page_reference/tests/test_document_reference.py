@@ -4,7 +4,6 @@
 from markupsafe import Markup
 
 from odoo.exceptions import ValidationError
-
 from odoo.tests.common import TransactionCase
 
 

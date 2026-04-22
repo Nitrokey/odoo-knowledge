@@ -63,7 +63,7 @@ class DocumentPage(models.Model):
         for rec in self:
             if rec.type == "content":
                 rec.content = rec.get_content()
-        super()._inverse_content()
+        return super()._inverse_content()
 
     def _resolve_reference(self, code):
         doc = self._get_document(code)
