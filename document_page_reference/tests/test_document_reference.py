@@ -5,10 +5,10 @@ from markupsafe import Markup
 
 from odoo.exceptions import ValidationError
 
-from odoo.addons.base.tests.common import BaseCommon
+from odoo.tests.common import TransactionCase
 
 
-class TestDocumentReference(BaseCommon):
+class TestDocumentReference(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -31,7 +31,7 @@ class TestDocumentReference(BaseCommon):
         with self.assertRaises(ValidationError):
             self.page2.write({"reference": self.page2.reference + "-02"})
 
-    def test_no_contrains(self):
+    def test_no_constrains(self):
         self.page1.write({"reference": False})
         self.assertFalse(self.page1.reference)
         self.page2.write({"reference": False})
@@ -71,5 +71,21 @@ class TestDocumentReference(BaseCommon):
             self.assertEqual(res.get(key), expected_value, f"Mismatch in key: {key}")
 
     def test_compute_content_parsed(self):
-        self.page1.content = Markup("<p></p>")
-        self.assertEqual(self.page1.content_parsed, Markup("<p></p>"))
+        self.page1.content = Markup("<p>{{r2}}</p>")
+        self.page1._compute_content_parsed()
+        self.assertIn("data-oe-model='document.page'", self.page1.content_parsed)
+        self.assertIn(f"data-oe-id='{self.page2.id}'", self.page1.content_parsed)
+        self.assertIn(f"href='{self.page2.backend_url}'", self.page1.content_parsed)
+        self.assertIn("Test Page 1", self.page1.content_parsed)
+
+    def test_compute_content_parsed_rich_text(self):
+        # Case where editor injects tags inside the curly braces
+        self.page1.content = Markup("<p>{{<b>r2</b>}}</p>")
+        self.page1._compute_content_parsed()
+        self.assertIn(f"data-oe-id='{self.page2.id}'", self.page1.content_parsed)
+
+    def test_inverse_content_replacement(self):
+        self.page1.write({"content": "{{r2}}"})
+        self.assertIn(f"data-oe-id='{self.page2.id}'", self.page1.content)
+        self.assertIn(f"href='{self.page2.backend_url}'", self.page1.content_parsed)
+        self.assertNotIn("&lt;a", self.page1.content)
