@@ -57,6 +57,16 @@ class DocumentPage(models.Model):
             content_parsed = content_parsed.replace(
                 text, self._resolve_reference(reference)
             )
+        link_regex = (
+            r"<a[^>]*class=['\"][^'\"]*oe_direct_line[^'\"]*['\"]"
+            r"[^>]*name=['\"]([^'\"]*)['\"][^>]*>.*?</a>"
+        )
+        for match in re.finditer(link_regex, raw):
+            full_link = match.group(0)
+            reference = match.group(1)
+            content_parsed = content_parsed.replace(
+                full_link, self._resolve_reference(reference)
+            )
         return content_parsed
 
     def _inverse_content(self):

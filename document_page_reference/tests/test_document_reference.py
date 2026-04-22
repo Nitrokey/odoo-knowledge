@@ -17,7 +17,7 @@ class TestDocumentReference(TransactionCase):
             {"name": "Test Page 1", "content": Markup("{{r2}}"), "reference": "R1"}
         )
         cls.page2 = cls.page_obj.create(
-            {"name": "Test Page 1", "content": Markup("{{r1}}"), "reference": "r2"}
+            {"name": "Test Page 2", "content": Markup("{{r1}}"), "reference": "r2"}
         )
 
     def test_constraints_duplicate_reference(self):
@@ -75,7 +75,7 @@ class TestDocumentReference(TransactionCase):
         self.assertIn("data-oe-model='document.page'", self.page1.content_parsed)
         self.assertIn(f"data-oe-id='{self.page2.id}'", self.page1.content_parsed)
         self.assertIn(f"href='{self.page2.backend_url}'", self.page1.content_parsed)
-        self.assertIn("Test Page 1", self.page1.content_parsed)
+        self.assertIn("Test Page 2", self.page1.content_parsed)
 
     def test_compute_content_parsed_rich_text(self):
         # Case where editor injects tags inside the curly braces
