@@ -50,7 +50,7 @@ class DocumentPage(models.Model):
 
     def get_content(self):
         self.ensure_one()
-        raw = self.content or ""
+        raw = str(self.content or "")
         content_parsed = Markup(raw)
         for text in re.findall(r"\{\{.*?\}\}", raw):
             reference = re.sub(r"<[^>]*>", "", text).replace("{{", "").replace("}}", "")
@@ -65,7 +65,7 @@ class DocumentPage(models.Model):
             full_link = match.group(0)
             reference = match.group(1)
             content_parsed = content_parsed.replace(
-                full_link, self._resolve_reference(reference)
+                Markup(full_link), self._resolve_reference(reference)
             )
         return content_parsed
 
@@ -91,7 +91,7 @@ class DocumentPage(models.Model):
         )
 
     def get_raw_content(self):
-        return Markup(self.with_context(raw_reference=True).get_content())
+        return str(self.with_context(raw_reference=True).get_content())
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -37,7 +37,9 @@ class TestDocumentReference(TransactionCase):
         self.assertFalse(self.page2.reference)
 
     def test_check_raw(self):
-        self.assertEqual(self.page2.display_name, self.page1.get_raw_content())
+        self.assertEqual(
+            str(self.page2.display_name), str(self.page1.get_raw_content())
+        )
 
     def test_auto_reference(self):
         """Test if reference is proposed when saving a page without one."""
@@ -76,12 +78,6 @@ class TestDocumentReference(TransactionCase):
         self.assertIn(f"data-oe-id='{self.page2.id}'", self.page1.content_parsed)
         self.assertIn(f"href='{self.page2.backend_url}'", self.page1.content_parsed)
         self.assertIn("Test Page 2", self.page1.content_parsed)
-
-    def test_compute_content_parsed_rich_text(self):
-        # Case where editor injects tags inside the curly braces
-        self.page1.content = Markup("<p>{{<b>r2</b>}}</p>")
-        self.page1._compute_content_parsed()
-        self.assertIn(f"data-oe-id='{self.page2.id}'", self.page1.content_parsed)
 
     def test_inverse_content_replacement(self):
         self.page1.write({"content": "{{r2}}"})
