@@ -104,6 +104,33 @@ class TestDocumentPageApproval(BaseCommon):
         chreq.with_user(self.user2).action_approve()
         self.assertEqual(page.content, "<p>New content</p>")
 
+    def test_change_request_no_duplicates(self):
+        """Repeated saves update the user's open change request."""
+        page = self.page2.with_user(self.manager_user)
+        page.write({"content": "<p>Edit 1</p>"})
+        chreq = self.history_obj.search(
+            [("page_id", "=", page.id), ("create_uid", "=", self.manager_user.id)]
+        )
+        self.assertEqual(len(chreq), 1)
+        self.assertEqual(chreq.state, "to approve")
+
+        page.write({"content": '<p data-last-history-steps="1,2">Edit 1</p>'})
+        page.write({"content": "<p>Edit 2</p>"})
+        chreq_after = self.history_obj.search(
+            [("page_id", "=", page.id), ("create_uid", "=", self.manager_user.id)]
+        )
+        self.assertEqual(chreq_after, chreq)
+        self.assertEqual(chreq.content, "<p>Edit 2</p>")
+
+    def test_change_request_unchanged_content(self):
+        """Saving the approved content again creates no change request."""
+        page = self.page1
+        count = self.history_obj.search_count([("page_id", "=", page.id)])
+        page.write({"content": page.content + "\n"})
+        self.assertEqual(
+            self.history_obj.search_count([("page_id", "=", page.id)]), count
+        )
+
     def test_change_request_auto_approve(self):
         """Test that a page without approval required auto-approves changes."""
         page = self.page1

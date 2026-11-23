@@ -130,6 +130,34 @@ class DocumentPage(models.Model):
             )
             rec.user_has_drafts = changes > 0
 
+    def _get_open_change_request(self):
+        """Return the current user's change request still waiting for approval."""
+        self.ensure_one()
+        return self.env["document.page.history"].search(
+            [
+                ("page_id", "=", self.id),
+                ("state", "in", ("draft", "to approve")),
+                ("create_uid", "=", self.env.uid),
+            ],
+            order="id DESC",
+            limit=1,
+        )
+
+    def _inverse_content(self):
+        """Update the user's open change request instead of piling up new ones."""
+        todo = self.browse()
+        for rec in self:
+            change_request = (
+                rec.type == "content"
+                and rec._is_content_changed(rec.history_head.content)
+                and rec._get_open_change_request()
+            )
+            if not change_request:
+                todo |= rec
+            elif rec._is_content_changed(change_request.content):
+                change_request.content = rec.content
+        return super(DocumentPage, todo)._inverse_content()
+
     def _create_history(self, vals):
         res = super()._create_history(vals)
         res.action_to_approve()
