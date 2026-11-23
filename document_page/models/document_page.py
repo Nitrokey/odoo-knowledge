@@ -1,8 +1,16 @@
 # Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import re
+
+from lxml import etree, html
+
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+
+_HISTORY_STEPS_RE = re.compile(r'\sdata-last-history-steps="[^"]*"')
+_INTER_TAG_WS_RE = re.compile(r">\s+<")
+_WHITESPACE_RE = re.compile(r"\s+")
 
 
 class DocumentPage(models.Model):
@@ -142,9 +150,39 @@ class DocumentPage(models.Model):
                     # html widget's default, so it doesn't trigger ghost save
                     rec.content = self._HTML_WIDGET_DEFAULT_VALUE
 
+    @api.model
+    def _normalize_content(self, content):
+        """Return a canonical form of the HTML, used to detect real changes.
+
+        The HTML editor adds ``data-last-history-steps`` in collaborative mode
+        and may reformat the markup when a page is only opened, which must not
+        produce a new history entry.
+        """
+        content = _HISTORY_STEPS_RE.sub("", content or "")
+        try:
+            fragments = html.fragments_fromstring(content)
+        except (etree.ParserError, ValueError):
+            fragments = [content]
+        content = "".join(
+            frag if isinstance(frag, str) else html.tostring(frag, encoding="unicode")
+            for frag in fragments
+        )
+        content = _WHITESPACE_RE.sub(" ", _INTER_TAG_WS_RE.sub("><", content)).strip()
+        if content in ("", self._HTML_WIDGET_DEFAULT_VALUE):
+            return ""
+        return content
+
+    def _is_content_changed(self, old_content):
+        self.ensure_one()
+        return self._normalize_content(self.content) != self._normalize_content(
+            old_content
+        )
+
     def _inverse_content(self):
         for rec in self:
-            if rec.type == "content" and rec.content != rec.history_head.content:
+            if rec.type == "content" and rec._is_content_changed(
+                rec.history_head.content
+            ):
                 rec._create_history(
                     {
                         "page_id": rec.id,

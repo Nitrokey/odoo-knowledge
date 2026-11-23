@@ -23,6 +23,30 @@ class TestDocumentPage(common.TransactionCase):
         page.content = "<p>New content for Demo Page</p>"
         self.assertEqual(len(page.history_ids), 2)
 
+    def test_page_unchanged_content_no_history(self):
+        page = self.page_obj.create(
+            {
+                "name": "Test Page Unchanged",
+                "content": "<p>Test content</p>\n<p>Second line</p>",
+            }
+        )
+        self.assertEqual(len(page.history_ids), 1)
+        page.content = "<p>Test content</p>\n<p>Second line</p>"
+        page.content = (
+            '<p data-last-history-steps="123,456">Test content</p><p>Second line</p>'
+        )
+        page.content = "<p>Test content</p>\n  <p>Second  line</p>\n"
+        self.assertEqual(len(page.history_ids), 1)
+        page.content = "<p>Test content</p><p>Changed line</p>"
+        self.assertEqual(len(page.history_ids), 2)
+
+    def test_page_empty_content_no_history(self):
+        page = self.page_obj.create({"name": "Test Page Empty"})
+        self.assertFalse(page.history_ids)
+        page.content = "<p><br></p>"
+        page.content = ""
+        self.assertFalse(page.history_ids)
+
     def test_category_template(self):
         page = self.page_obj.create(
             {"name": "Test Page 2", "parent_id": self.category1.id}
